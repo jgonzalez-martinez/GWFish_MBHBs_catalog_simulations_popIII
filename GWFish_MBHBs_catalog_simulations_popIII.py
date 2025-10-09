@@ -1,5 +1,7 @@
-#!/usr/bin/env python
-# coding: utf-8
+# ### Import packages
+
+# In[1]:
+
 
 # suppress warning outputs for using lal in jupuyter notebook
 import warnings 
@@ -40,9 +42,9 @@ pop = generate_synthetic_MBHB_population(
     N=N_obs,
     geoctime_i=t0,
     geoctime_f=T,    
-    alpha1=1.5, alpha2=2.5,
-    m_min=5e2, m_break=1e3, m_max=5e3, #m_min=5e5, m_break=1e6, m_max=5e6
-    q_min=0.5, q_max=1.0, #q_min=0.5, q_max=1.0
+    alpha1=3.2, alpha2=-0.78,
+    Mz_min=1e3, Mz_break=1e4, Mz_max=1e8, 
+    q_min=0.5, q_max=1.0, 
     spin_alpha=30, spin_beta=3,
     z_min=0, z_max=19.0, grid_size=1000
 )
@@ -99,14 +101,11 @@ parameters
 
 
 df = pd.DataFrame(parameters)
-df.to_csv("mbhb_popIII_catalog.tsv", sep="\t", index=False)
+df.to_csv("mbhb_popIII_Mzmin103_Mzmax108_pars.tsv", sep="\t", index=False)
 
 
 # In[5]:
 
-
-# We choose a waveform approximant suitable for BNS analysis
-# In this case we are taking into account tidal polarizability effects
 waveform_model = 'IMRPhenomPv2'
 f_ref = 1e-4
 
@@ -160,13 +159,13 @@ snr = gw.utilities.get_snr(parameters, network, waveform_model, f_ref)
 
 
 df = pd.DataFrame(snr)
-df.to_csv("mbhb_popIII_catalog_snr.tsv", sep="\t", index=False)
+df.to_csv("mbhb_popIII_Mzmin103_Mzmax108_snr.tsv", sep="\t", index=False)
 
 
 # ## Calculate $1\sigma$ Errors
 # For a more realistic analysis we can include the **duty cycle** of the detectors using `use_duty_cycle = True`
 
-# In[13]:
+# In[12]:
 
 
 # The fisher parameters are the parameters that will be used to calculate the Fisher matrix
@@ -182,7 +181,7 @@ fisher_parameters = ['mass_1', 'mass_2', 'luminosity_distance', 'theta_jn', 'ra'
 #                      'geocent_time', 'a_1', 'a_2'] #deleted psi, and phase because priors can be used
 
 
-# In[ ]:
+# In[13]:
 
 
 detected, network_snr, parameter_errors, sky_localization = gw.fishermatrix.compute_network_errors(
@@ -204,7 +203,7 @@ save_matrices_path = '/home/2809904g/popIII', # default is None anyway,
     
 
 
-# In[ ]:
+# In[14]:
 
 
 # Choose percentile factor of sky localization and pass from rad2 to deg2
@@ -213,7 +212,7 @@ sky_localization_90cl = sky_localization * gw.fishermatrix.sky_localization_perc
 #sky_localization_90cl
 
 
-# In[ ]:
+# In[15]:
 
 
 # One can create a dictionary with the parameter errors, the order is the same as the one given in fisher_parameters
@@ -225,7 +224,7 @@ for i, parameter in enumerate(fisher_parameters):
 parameter_errors_dict
 
 
-# In[ ]:
+# In[16]:
 
 
 data_folder = '/home/2809904g/popIII' 
@@ -234,7 +233,7 @@ gw.fishermatrix.analyze_and_save_to_txt(network = network,
                                         parameter_values  = parameters,
                                         fisher_parameters = fisher_parameters, 
                                         sub_network_ids_list = [[0]],
-                                        population_name = f'MBHB_catalog_popIII_withfisher_tilts',
+                                        population_name = f'MBHB_catalog_popIII_withfisher_tilts_Mzmin103_Mzmax108',
                                         waveform_model = waveform_model,
                                         f_ref = 1e-4,
                                         save_path = data_folder,
